@@ -16,7 +16,9 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
 
       - name: Install dependencies
-        run: forge install
+        run: |
+          forge install foundry-rs/forge-std --no-commit
+          forge install OpenZeppelin/openzeppelin-contracts --no-commit
 
       - name: Run tests
         run: forge test
