@@ -186,7 +186,7 @@ contract ReclaimTest is Test {
         reclaim.verifyProof(proof);
     }
 
-    function test_VerifyRealWorldProof() public view {
+    function test_VerifyRealWorldProof() public {
         // Real-world proof from Reclaim Protocol
         Claims.ClaimInfo memory claimInfo = Claims.ClaimInfo({
             provider: "http",
@@ -219,6 +219,75 @@ contract ReclaimTest is Test {
         assertEq(claimData.identifier, expectedIdentifier, "Identifier should match hash of claimInfo");
 
         // This should not revert - proof is valid
+        reclaim.verifyProof(proof);
+    }
+
+    function test_VerifyProofRevertAlreadyUsed() public {
+        // Setup: Add epoch with our test witness
+        Reclaim.Witness[] memory witnesses = new Reclaim.Witness[](1);
+        witnesses[0] = Reclaim.Witness({
+            addr: witnessAddress,
+            host: "wss://test.example.com"
+        });
+        reclaim.addNewEpoch(witnesses, 1);
+
+        // Create claim info
+        Claims.ClaimInfo memory claimInfo = Claims.ClaimInfo({
+            provider: "test-provider",
+            parameters: "test-params",
+            context: "test-context"
+        });
+
+        bytes32 identifier = Claims.hashClaimInfo(claimInfo);
+
+        // Create complete claim data
+        Claims.CompleteClaimData memory claimData = Claims.CompleteClaimData({
+            identifier: identifier,
+            owner: address(this),
+            timestampS: uint32(block.timestamp),
+            epoch: 2
+        });
+
+        // Sign the claim
+        bytes memory serialised = abi.encodePacked(
+            _bytes2str(abi.encodePacked(claimData.identifier)),
+            "\n",
+            _address2str(claimData.owner),
+            "\n",
+            _uint2str(claimData.timestampS),
+            "\n",
+            _uint2str(claimData.epoch)
+        );
+
+        bytes32 messageHash = keccak256(
+            abi.encodePacked(
+                "\x19Ethereum Signed Message:\n",
+                _uint2str(serialised.length),
+                serialised
+            )
+        );
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(WITNESS_PRIVATE_KEY, messageHash);
+        bytes memory signature = abi.encodePacked(r, s, v);
+
+        bytes[] memory signatures = new bytes[](1);
+        signatures[0] = signature;
+
+        Claims.SignedClaim memory signedClaim = Claims.SignedClaim({
+            claim: claimData,
+            signatures: signatures
+        });
+
+        Reclaim.Proof memory proof = Reclaim.Proof({
+            claimInfo: claimInfo,
+            signedClaim: signedClaim
+        });
+
+        // First verification should succeed
+        reclaim.verifyProof(proof);
+
+        // Second verification with same proof should fail
+        vm.expectRevert("Proof already used");
         reclaim.verifyProof(proof);
     }
 

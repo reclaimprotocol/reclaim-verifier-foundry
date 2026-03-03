@@ -54,7 +54,11 @@ contract Reclaim {
 	 * */
     uint32 public currentEpoch;
 
+    /** mapping to track used proofs (prevents replay attacks) */
+    mapping(bytes32 => bool) public usedProofs;
+
     event EpochAdded(Epoch epoch);
+    event ProofUsed(bytes32 indexed identifier);
     address public owner;
 
     /**
@@ -141,7 +145,11 @@ contract Reclaim {
 	 * Call the function to assert
 	 * the validity of several claims proofs
 	 */
-    function verifyProof(Proof memory proof) public view{
+    function verifyProof(Proof memory proof) public {
+		// check if the proof has already been used
+        bytes32 proofIdentifier = proof.signedClaim.claim.identifier;
+        require(!usedProofs[proofIdentifier], "Proof already used");
+
 		// create signed claim using claimData and signature.
         require(proof.signedClaim.signatures.length > 0, "No signatures");
         Claims.SignedClaim memory signed = Claims.SignedClaim(proof.signedClaim.claim, proof.signedClaim.signatures);
@@ -175,6 +183,10 @@ contract Reclaim {
             }
             require(found, "Signature not appropriate");
         }
+
+        // mark the proof as used
+        usedProofs[proofIdentifier] = true;
+        emit ProofUsed(proofIdentifier);
     }
 
 
