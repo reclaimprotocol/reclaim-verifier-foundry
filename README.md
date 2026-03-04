@@ -32,8 +32,14 @@ forge script script/Reclaim.s.sol --rpc-url $RPC_URL --broadcast
 
 ## Usage
 
+Install dependency:
+
+```bash
+forge install reclaimprotocol/reclaim-verifier-foundry
+```
+
 ```solidity
-import {Reclaim} from "./Reclaim.sol";
+import {Reclaim} from "reclaim-verifier-foundry/Reclaim.sol";
 
 // Verify a proof
 reclaim.verifyProof(proof);
