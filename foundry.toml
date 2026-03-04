@@ -4,8 +4,7 @@ out = "out"
 libs = ["lib"]
 ignored_warnings_from = ["src"]
 remappings = [
-    "forge-std/=lib/forge-std/src/",
-    "@openzeppelin/=lib/openzeppelin-contracts/"
+    "forge-std/=lib/forge-std/src/"
 ]
 
 [lint]
