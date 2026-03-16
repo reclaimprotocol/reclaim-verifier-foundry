@@ -5,6 +5,8 @@ import {Script, console} from "forge-std/Script.sol";
 import {Reclaim} from "../src/Reclaim.sol";
 
 contract ReclaimScript is Script {
+    string constant ADDRESSES_PATH = "deployments/addresses.json";
+
     function run() public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 
@@ -17,5 +19,23 @@ contract ReclaimScript is Script {
         console.log("Reclaim deployed at:", address(reclaim));
         console.log("Owner:", reclaim.owner());
         console.log("Current epoch:", reclaim.currentEpoch());
+
+        _saveDeployment(address(reclaim));
+    }
+
+    function _saveDeployment(address reclaim) internal {
+        string memory chainId = vm.toString(block.chainid);
+        string memory json;
+
+        if (vm.exists(ADDRESSES_PATH)) {
+            json = vm.readFile(ADDRESSES_PATH);
+        } else {
+            json = "{}";
+        }
+
+        string memory newEntry = vm.serializeAddress(chainId, "Reclaim", reclaim);
+        vm.writeJson(newEntry, ADDRESSES_PATH, string.concat(".", chainId));
+
+        console.log("Saved deployment to", ADDRESSES_PATH, "for chain", chainId);
     }
 }
