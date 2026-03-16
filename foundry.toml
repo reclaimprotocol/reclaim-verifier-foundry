@@ -6,6 +6,7 @@ ignored_warnings_from = ["src"]
 remappings = [
     "forge-std/=lib/forge-std/src/"
 ]
+fs_permissions = [{ access = "read-write", path = "deployments" }]
 
 [lint]
 lint_on_build = false

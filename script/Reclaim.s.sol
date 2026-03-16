@@ -25,16 +25,13 @@ contract ReclaimScript is Script {
 
     function _saveDeployment(address reclaim) internal {
         string memory chainId = vm.toString(block.chainid);
-        string memory json;
+        string memory addrStr = vm.toString(reclaim);
 
-        if (vm.exists(ADDRESSES_PATH)) {
-            json = vm.readFile(ADDRESSES_PATH);
-        } else {
-            json = "{}";
+        if (!vm.exists(ADDRESSES_PATH)) {
+            vm.writeFile(ADDRESSES_PATH, "{}");
         }
 
-        string memory newEntry = vm.serializeAddress(chainId, "Reclaim", reclaim);
-        vm.writeJson(newEntry, ADDRESSES_PATH, string.concat(".", chainId));
+        vm.writeJson(addrStr, ADDRESSES_PATH, string.concat(".", chainId));
 
         console.log("Saved deployment to", ADDRESSES_PATH, "for chain", chainId);
     }

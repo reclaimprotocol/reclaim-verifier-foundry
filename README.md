@@ -45,6 +45,12 @@ import {Reclaim} from "reclaim-verifier-foundry/Reclaim.sol";
 reclaim.verifyProof(proof);
 ```
 
+## Deployments
+
+| Chain Name | Deployed Address | Explorer Link |
+|:-----------|:-----------------|:--------------|
+| BNB Smart Chain Testnet | 0xe79A453bD088F4A58656b315a7C1f8Ea3473CCf1 | https://testnet.bsctrace.com/address/0xe79A453bD088F4A58656b315a7C1f8Ea3473CCf1 |
+
 ## License
 
 MIT
